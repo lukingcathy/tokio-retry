@@ -10,7 +10,7 @@ pub struct FixedInterval {
 impl FixedInterval {
     /// Constructs a new fixed interval strategy.
     pub fn new(duration: Duration) -> FixedInterval {
-        FixedInterval { duration: duration }
+        FixedInterval { duration }
     }
 
     /// Constructs a new fixed interval strategy,

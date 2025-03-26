@@ -1,6 +1,3 @@
-use std::cmp;
-use std::error;
-use std::fmt;
 use std::future::Future;
 use std::iter::{IntoIterator, Iterator};
 use std::pin::Pin;
@@ -107,8 +104,8 @@ where
         RetryIf {
             strategy: strategy.into_iter(),
             state: RetryState::Running(action.run()),
-            action: action,
-            condition: condition,
+            action,
+            condition,
         }
     }
 
@@ -159,10 +156,8 @@ where
                 Poll::Pending => Poll::Pending,
                 Poll::Ready(Err(err)) => {
                     if self.as_mut().project().condition.should_retry(&err) {
-                        match self.retry(err, cx) {
-                            Ok(poll) => poll,
-                            Err(err) => Poll::Ready(Err(err)),
-                        }
+                        self.retry(err, cx)
+                            .unwrap_or_else(|err| Poll::Ready(Err(err)))
                     } else {
                         Poll::Ready(Err(err))
                     }

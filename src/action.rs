@@ -13,9 +13,9 @@ pub trait Action {
 }
 
 impl<R, E, T: Future<Output = Result<R, E>>, F: FnMut() -> T> Action for F {
+    type Future = T;
     type Item = R;
     type Error = E;
-    type Future = T;
 
     fn run(&mut self) -> Self::Future {
         self()
