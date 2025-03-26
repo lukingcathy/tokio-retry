@@ -1,6 +1,4 @@
-use std::future::Future;
-
-/// An action can be run multiple times and produces a future.
+// An action can be run multiple times and produces a future.
 pub trait Action {
     /// The future that this action produces.
     type Future: Future<Output = Result<Self::Item, Self::Error>>;
