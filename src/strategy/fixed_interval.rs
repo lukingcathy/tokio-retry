@@ -30,11 +30,17 @@ impl Iterator for FixedInterval {
     }
 }
 
-#[test]
-fn returns_some_fixed() {
-    let mut s = FixedInterval::new(Duration::from_millis(123));
+#[cfg(test)]
+mod tests {
+    use crate::strategy::FixedInterval;
+    use std::time::Duration;
 
-    assert_eq!(s.next(), Some(Duration::from_millis(123)));
-    assert_eq!(s.next(), Some(Duration::from_millis(123)));
-    assert_eq!(s.next(), Some(Duration::from_millis(123)));
+    #[test]
+    fn returns_some_fixed() {
+        let mut s = FixedInterval::new(Duration::from_millis(123));
+
+        assert_eq!(s.next(), Some(Duration::from_millis(123)));
+        assert_eq!(s.next(), Some(Duration::from_millis(123)));
+        assert_eq!(s.next(), Some(Duration::from_millis(123)));
+    }
 }

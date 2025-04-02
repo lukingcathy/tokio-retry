@@ -48,7 +48,7 @@ impl Iterator for ExponentialBackoff {
     type Item = Duration;
 
     fn next(&mut self) -> Option<Duration> {
-        // set delay duration by applying factor
+        // set delay duration by applying a factor
         let duration = if let Some(duration) = self.current.checked_mul(self.factor) {
             Duration::from_millis(duration)
         } else {
@@ -72,56 +72,62 @@ impl Iterator for ExponentialBackoff {
     }
 }
 
-#[test]
-fn returns_some_exponential_base_10() {
-    let mut s = ExponentialBackoff::from_millis(10);
+#[cfg(test)]
+mod tests {
+    use crate::strategy::ExponentialBackoff;
+    use std::time::Duration;
 
-    assert_eq!(s.next(), Some(Duration::from_millis(10)));
-    assert_eq!(s.next(), Some(Duration::from_millis(100)));
-    assert_eq!(s.next(), Some(Duration::from_millis(1000)));
-}
+    #[test]
+    fn returns_some_exponential_base_10() {
+        let mut s = ExponentialBackoff::from_millis(10);
 
-#[test]
-fn returns_some_exponential_base_2() {
-    let mut s = ExponentialBackoff::from_millis(2);
+        assert_eq!(s.next(), Some(Duration::from_millis(10)));
+        assert_eq!(s.next(), Some(Duration::from_millis(100)));
+        assert_eq!(s.next(), Some(Duration::from_millis(1000)));
+    }
 
-    assert_eq!(s.next(), Some(Duration::from_millis(2)));
-    assert_eq!(s.next(), Some(Duration::from_millis(4)));
-    assert_eq!(s.next(), Some(Duration::from_millis(8)));
-}
+    #[test]
+    fn returns_some_exponential_base_2() {
+        let mut s = ExponentialBackoff::from_millis(2);
 
-#[test]
-fn saturates_at_maximum_value() {
-    let mut s = ExponentialBackoff::from_millis(u64::MAX - 1);
+        assert_eq!(s.next(), Some(Duration::from_millis(2)));
+        assert_eq!(s.next(), Some(Duration::from_millis(4)));
+        assert_eq!(s.next(), Some(Duration::from_millis(8)));
+    }
 
-    assert_eq!(s.next(), Some(Duration::from_millis(u64::MAX - 1)));
-    assert_eq!(s.next(), Some(Duration::from_millis(u64::MAX)));
-    assert_eq!(s.next(), Some(Duration::from_millis(u64::MAX)));
-}
+    #[test]
+    fn saturates_at_maximum_value() {
+        let mut s = ExponentialBackoff::from_millis(u64::MAX - 1);
 
-#[test]
-fn can_use_factor_to_get_seconds() {
-    let factor = 1000;
-    let mut s = ExponentialBackoff::from_millis(2).factor(factor);
+        assert_eq!(s.next(), Some(Duration::from_millis(u64::MAX - 1)));
+        assert_eq!(s.next(), Some(Duration::from_millis(u64::MAX)));
+        assert_eq!(s.next(), Some(Duration::from_millis(u64::MAX)));
+    }
 
-    assert_eq!(s.next(), Some(Duration::from_secs(2)));
-    assert_eq!(s.next(), Some(Duration::from_secs(4)));
-    assert_eq!(s.next(), Some(Duration::from_secs(8)));
-}
+    #[test]
+    fn can_use_factor_to_get_seconds() {
+        let factor = 1000;
+        let mut s = ExponentialBackoff::from_millis(2).factor(factor);
 
-#[test]
-fn stops_increasing_at_max_delay() {
-    let mut s = ExponentialBackoff::from_millis(2).max_delay(Duration::from_millis(4));
+        assert_eq!(s.next(), Some(Duration::from_secs(2)));
+        assert_eq!(s.next(), Some(Duration::from_secs(4)));
+        assert_eq!(s.next(), Some(Duration::from_secs(8)));
+    }
 
-    assert_eq!(s.next(), Some(Duration::from_millis(2)));
-    assert_eq!(s.next(), Some(Duration::from_millis(4)));
-    assert_eq!(s.next(), Some(Duration::from_millis(4)));
-}
+    #[test]
+    fn stops_increasing_at_max_delay() {
+        let mut s = ExponentialBackoff::from_millis(2).max_delay(Duration::from_millis(4));
 
-#[test]
-fn returns_max_when_max_less_than_base() {
-    let mut s = ExponentialBackoff::from_millis(20).max_delay(Duration::from_millis(10));
+        assert_eq!(s.next(), Some(Duration::from_millis(2)));
+        assert_eq!(s.next(), Some(Duration::from_millis(4)));
+        assert_eq!(s.next(), Some(Duration::from_millis(4)));
+    }
 
-    assert_eq!(s.next(), Some(Duration::from_millis(10)));
-    assert_eq!(s.next(), Some(Duration::from_millis(10)));
+    #[test]
+    fn returns_max_when_max_less_than_base() {
+        let mut s = ExponentialBackoff::from_millis(20).max_delay(Duration::from_millis(10));
+
+        assert_eq!(s.next(), Some(Duration::from_millis(10)));
+        assert_eq!(s.next(), Some(Duration::from_millis(10)));
+    }
 }
